@@ -17,10 +17,10 @@ public class NotificationService {
 
     public void sendNotification(User user, String message) throws Exception {
         NotificationDTO notificationDTO = new NotificationDTO(user.getEmail(), message);
-        ResponseEntity<String> response = restTemplate.postForEntity("http://o4d9z.mocklab.io/notify", notificationDTO, String.class);
+       // ResponseEntity<String> response = restTemplate.postForEntity("http://o4d9z.mocklab.io/notify", notificationDTO, String.class);
 
-        if (!(response.getStatusCode() == HttpStatus.OK)){
-            throw  new Exception("Serviço de notificação está indisponivel");
-        }
+//        if (!(response.getStatusCode() == HttpStatus.OK)){
+//            throw  new Exception("Serviço de notificação está indisponivel");
+//        }
     }
 }

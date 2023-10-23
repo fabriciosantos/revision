@@ -26,7 +26,7 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private AuthorizeTransactionService authorizeTransactionService;
 
     @Autowired
     private NotificationService notificationService;
@@ -36,9 +36,9 @@ public class TransactionService {
         User receiver = userService.findUserById(transaction.receiverId());
         userService.validateTransaction(sender, transaction.value());
 
-//        if (authorizeTransaction(sender, transaction.value())){
-//            throw new Exception("Transação não autorizada");
-//        }
+        if (!authorizeTransactionService.authorize(sender, transaction.value())){
+            throw new Exception("Transação não autorizada");
+        }
 
         Transactions newTransaction = Transactions.builder()
                 .amount(transaction.value())
@@ -51,8 +51,8 @@ public class TransactionService {
         transactionRepository.save(newTransaction);
         userService.saveUser(sender);
         userService.saveUser(receiver);
-//        notificationService.sendNotification(sender, "transação realizada com sucesso");
-//        notificationService.sendNotification(receiver, "transação recebida com sucesso");
+        notificationService.sendNotification(sender, "Transação realizada com sucesso");
+        notificationService.sendNotification(receiver, "Transação recebida com sucesso");
 
         return newTransaction;
     }
@@ -61,11 +61,4 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
 
-    public boolean authorizeTransaction(User user, BigDecimal value){
-        ResponseEntity<Map> response =  restTemplate.getForEntity("https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6", Map.class);
-        if (response.getStatusCode() == HttpStatus.OK ){
-            String message = (String) response.getBody().get("message");
-            return "Autorizado".equalsIgnoreCase(message);
-        } else return false;
-    }
 }
